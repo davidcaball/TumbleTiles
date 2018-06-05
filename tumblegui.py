@@ -14,6 +14,8 @@ import tumbleEdit as TE
 from getFile import getFile, parseFile
 from boardgui import redrawCanvas, drawGrid
 import os,sys
+from sets import Set
+import time
 #https://pypi.python.org/pypi/pyscreenshot
 
 try:
@@ -26,7 +28,7 @@ except ImportError:
 
 LOGFILE = None
 LOGFILENAME = ""
-TILESIZE = 35
+TILESIZE = 20
 VERSION = "1.5"
 LASTLOADEDFILE = ""
 
@@ -322,6 +324,176 @@ class tumblegui:
 
         elif event.keysym == "r" and MODS.get( event.state, None ) == 'Control':
             self.reloadFile()
+        elif event.keysym == "g":
+            self.logStartingCoordinates()
+        elif event.keysym == "h":
+            self.logStuckCoordinates()
+
+    def logStartingCoordinates(self):
+        adding = True
+        positionSet = Set()
+        redSet = Set()
+
+        blueStart1 = "2100"
+        blueStart2 = "0020"
+        blueStart3 = "3817"
+        blueStart4 = "1838"
+
+        file = open("coordinates.txt", "w")
+        randToDirection = {'0':'N', '1':'E', '2':'S', '3':'W'}
+        tile = self.board.Polyominoes[0].Tiles[0]
+
+        tile.x = 36
+        tile.y = 3
+
+        tileMoved = False
+        for x in range(0,2000):
+            stringX = str(tile.x)
+            stringY = str(tile.y)
+            coordString = ""
+
+            if len(stringX) == 1:
+                coordString = "0"
+            coordString = coordString + stringX
+
+            if len(stringY) == 1:
+                coordString = coordString + "0"
+            coordString = coordString + stringY
+
+
+            
+
+            if coordString not in redSet:
+                redSet.add(coordString)
+                print(coordString)    
+                file.write(blueStart1 + coordString + ",")
+                file.write(blueStart2 + coordString + ",")
+                file.write(blueStart3 + coordString + ",")
+                file.write(blueStart4 + coordString + ",")
+                positionSet.add(blueStart1 + coordString)
+                positionSet.add(blueStart2 + coordString)
+                positionSet.add(blueStart3 + coordString)
+                positionSet.add(blueStart4 + coordString)
+
+            self.moveRandomDirection()
+
+            if tileMoved == False and x > 1000:
+                tile.x = 4
+                tile.y = 35
+                tileMoved = True
+
+        print "Length of the set is ", len(positionSet)
+
+    def logStuckCoordinates(self):
+        adding = True
+        positionSet = Set()
+        
+        file = open("stuckCoordinates.txt", "w")
+
+        blueTile = self.board.Polyominoes[1].Tiles[0]
+        redTile = self.board.Polyominoes[0].Tiles[0]
+
+        
+        tileMoved = False
+        for x in range(0,5000):
+            if x % 1000 == 0:
+                print "at try ", x
+            redStringX = str(redTile.x)
+            redStringY = str(redTile.y)
+            blueStringX = str(blueTile.x)
+            blueStringY = str(blueTile.y)
+            coordString = ""
+
+            if len(blueStringX) == 1:
+                coordString = coordString + "0"
+            coordString = coordString + blueStringX
+
+            if len(blueStringY) == 1:
+                coordString = coordString + "0"
+            coordString = coordString + blueStringY
+
+            if len(redStringX) == 1:
+                coordString = coordString + "0"
+            coordString = coordString + redStringX
+
+            if len(redStringY) == 1:
+                coordString = coordString + "0"
+            coordString = coordString + redStringY
+
+
+            if coordString not in positionSet:
+                print(coordString)    
+                file.write(coordString + ",")
+                positionSet.add(coordString)
+                positionSet.add(coordString)
+                positionSet.add(coordString)
+                positionSet.add(coordString)
+
+            self.moveRandomDirection()
+
+        file = open("stuckCoordinates.txt", "a")
+
+        bluePoly = self.board.Polyominoes[1]
+        bluePoly.Tiles[0].x = 18
+        bluePoly.Tiles[0].y = 8
+        bluePoly.Tiles[1].x = 19
+        bluePoly.Tiles[1].y = 8
+        bluePoly.Tiles[2].x = 18
+        bluePoly.Tiles[2].y = 9
+        bluePoly.Tiles[3].x = 19
+        bluePoly.Tiles[3].y = 9
+
+        redTile.x = 4
+        redTile.y = 35
+
+        time.sleep(3)
+
+        for x in range(0,5000):
+            if x % 1000 == 0:
+                print "at try ", x
+            redStringX = str(redTile.x)
+            redStringY = str(redTile.y)
+            blueStringX = str(blueTile.x)
+            blueStringY = str(blueTile.y)
+            coordString = ""
+
+            if len(blueStringX) == 1:
+                coordString = coordString + "0"
+            coordString = coordString + blueStringX
+
+            if len(blueStringY) == 1:
+                coordString = coordString + "0"
+            coordString = coordString + blueStringY
+
+            if len(redStringX) == 1:
+                coordString = coordString + "0"
+            coordString = coordString + redStringX
+
+            if len(redStringY) == 1:
+                coordString = coordString + "0"
+            coordString = coordString + redStringY
+
+
+            if coordString not in positionSet:
+                print(coordString)    
+                file.write(coordString + ",")
+                positionSet.add(coordString)
+                positionSet.add(coordString)
+                positionSet.add(coordString)
+                positionSet.add(coordString)
+
+            self.moveRandomDirection()
+
+
+        print "Length of the set is ", len(positionSet)
+            
+
+    def moveRandomDirection(self):
+            randToDirection = {'0':'N', '1':'E', '2':'S', '3':'W'}
+            rand = random.randint(0,3)
+            dir = randToDirection.get(str(rand))
+            self.MoveDirection(dir)    
+                       
 
         
     def callback(self, event):

@@ -13,7 +13,7 @@ import os,sys
 #the x and y coordinate that the preview tiles will begin to be drawn on
 PREVTILESTARTX = 20
 PREVTILESTARTY = 21
-TILESIZE = 35
+TILESIZE = 20
 PREVTILESIZE = 70
 
 NEWTILEWINDOW_W = 150
@@ -330,8 +330,17 @@ class TileEditorGUI:
 
 	def onBoardClick(self, event):
 		#Determine the position on the board the player clicked
+		x = event.x/self.tile_size
+		y = event.y/self.tile_size
 		print "x: ", (event.x/self.tile_size)
 		print "y: ", (event.y/self.tile_size)
+
+		try:
+			index = self.board.Polyominoes.index(self.board.coordToTile[x][y].parent)
+			print "Index: ", index
+			print "subIndex: ", self.board.Polyominoes[index].Tiles.index(self.board.coordToTile[x][y])
+		except AttributeError as e:
+			print e
 
 		if self.remove_state or event.num == 3:
 			self.removeTileAtPos(event.x/self.tile_size, event.y/self.tile_size)
