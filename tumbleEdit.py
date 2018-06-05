@@ -330,8 +330,8 @@ class TileEditorGUI:
 
 	def onBoardClick(self, event):
 		#Determine the position on the board the player clicked
-		#print "x: ", (event.x/self.tile_size)
-		#print "y: ", (event.y/self.tile_size)
+		print "x: ", (event.x/self.tile_size)
+		print "y: ", (event.y/self.tile_size)
 
 		if self.remove_state or event.num == 3:
 			self.removeTileAtPos(event.x/self.tile_size, event.y/self.tile_size)
@@ -365,6 +365,7 @@ class TileEditorGUI:
 		
 
 	def addTileAtPos(self, x, y):
+
 		
 		i = self.selectedTileIndex
 
