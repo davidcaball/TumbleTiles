@@ -243,14 +243,20 @@ class tumblegui:
         settingsmenu.add_command(label="Board Options", command=self.changetile)
         settingsmenu.add_checkbutton(label="Factory Mode", onvalue=True, offvalue=False, variable= self.tkFACTORYMODE, command= self.setFactoryMode)
 
+        
+
         editormenu = Menu(self.menubar, tearoff=0)
         editormenu.add_command(label="Open Editor", command=self.editCurrentTiles)
         
         
+        scriptmenu = Menu(self.menubar, tearoff=0)
+        scriptmenu.add_command(label="Run Script", command=self.loadScript)
+
         self.menubar.add_cascade(label="File", menu=filemenu)
         self.menubar.add_cascade(label="Settings", menu=settingsmenu)
         self.menubar.add_cascade(label="Editor", menu=editormenu)
         self.menubar.add_cascade(label="Help", menu=aboutmenu)
+        self.menubar.add_cascade(label="Script", menu=scriptmenu)
         self.root.config(menu=self.menubar)
         
         #toolbar
@@ -353,6 +359,64 @@ class tumblegui:
         # print(coordString)
 
         return coordString
+
+    def loadScript(self):
+
+        randomDir = {"0":"N", "1":"E","2":"S","3":"W"}
+
+
+        filename = getFile()
+        file = open(filename, "r")
+        self.runScript(file)
+
+
+    def runScript(self, file):
+        script = file.readlines()[0].rstrip('\n')
+        print(script)
+        coords = script[:8]
+        self.setCoordinatesFromString(coords)
+        self.callCanvasRedraw()
+        sequence = script[8:]
+        self.runSequence(sequence)
+
+    def runSequence(self, sequence):
+        for x in range(0, len(sequence)):
+            time.sleep(1)
+            print "Tumbling: ", sequence[x]
+            self.MoveDirection(sequence[x])
+            self.w.update_idletasks()
+
+    # Sets the blue and red tile from a 8 character string "XXYYxxyy"
+    def setCoordinatesFromString(self, coords):
+        blueX = int(coords[:2])
+        blueY = int(coords[2:4])
+
+        redX = int(coords[4:6])
+        redY = int(coords[6:8])
+
+        print "BlueX: ", blueX, "\nBlueY: ", blueY, "\nRedX: ", redX, "\nRedY: ", redY
+        
+        bluePoly = self.board.Polyominoes[1]
+        bluePoly.Tiles[0].x = blueX
+        bluePoly.Tiles[0].y = blueY
+
+        bluePoly.Tiles[1].x = blueX + 1
+        bluePoly.Tiles[1].y = blueY
+
+        bluePoly.Tiles[2].x = blueX
+        bluePoly.Tiles[2].y = blueY + 1
+
+        bluePoly.Tiles[3].x = blueX + 1
+        bluePoly.Tiles[3].y = blueY + 1
+
+        redPoly = self.board.Polyominoes[0]
+
+        redPoly.Tiles[0].x = redX
+        redPoly.Tiles[0].y = redY
+
+        self.board.remapArray()
+        self.board.verifyTileLocations()
+
 
     def logStartingCoordinates(self):
         adding = True

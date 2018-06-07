@@ -125,7 +125,7 @@ def revertBoardToStart(startingPosition):
 	redPoly.Tiles[0].y = redY
 
 	print "Current Positions\n Blue:\n1: ", bluePoly.Tiles[0].x, ", ", bluePoly.Tiles[0].y, "\n2: ", bluePoly.Tiles[1].x, ", ", bluePoly.Tiles[1].y, "\n3: ", bluePoly.Tiles[2].x, ", ", bluePoly.Tiles[2].y, "\n4: ", bluePoly.Tiles[3].x, ", ", bluePoly.Tiles[3].y 
-	time.sleep(5)
+	# time.sleep(5)
 	# board.ActivateGlues()
 
 def recurseTree(root, startingPosition, direction):
@@ -160,28 +160,28 @@ def recurseTree(root, startingPosition, direction):
 
 		board.Tumble("N")
 		newConfig = getCoordinateString()
-		if not newConfig == startingPosition and newConfig not in visitedPositions:
+		if not "N" == newNode.directionFromParent and newConfig not in visitedPositions:
 			newNode.north = recurseTree(newNode, newConfig,"N")
 
 		revertBoardToStart(startingPosition)
 
 		board.Tumble("S")
 		newConfig = getCoordinateString()
-		if not newConfig == startingPosition and newConfig not in visitedPositions:
+		if not "S" == newNode.directionFromParent and newConfig not in visitedPositions:
 			newNode.north = recurseTree(newNode, newConfig,"S")
 
 		revertBoardToStart(startingPosition)
 
 		board.Tumble("E")
 		newConfig = getCoordinateString()
-		if not newConfig == startingPosition and newConfig not in visitedPositions:
+		if not "E" == newNode.directionFromParent and newConfig not in visitedPositions:
 			newNode.north = recurseTree(newNode, newConfig,"E")
 
 		revertBoardToStart(startingPosition)
 
 		board.Tumble("W")
 		newConfig = getCoordinateString()
-		if not newConfig == startingPosition and newConfig not in visitedPositions:
+		if not "W" == newNode.directionFromParent and newConfig not in visitedPositions:
 			newNode.north = recurseTree(newNode, newConfig,"W")
 
 		return newNode
@@ -225,21 +225,22 @@ def logSequence(node, file):
 
 	logSequence(node.parent, file)
 
-	file.write(node.directionFromParent + ",")
+	file.write(node.directionFromParent)
 
 def logData():
 	file = open("Log/log.txt", "w")
 	file.write(start + "\n")
 	file.write("****************************\nSolutions:\n")
 	for node in solvedNodes:
+		file.write(start)
 		logSequence(node, file)
-		file.write("\n-\n")
-
-	file.write("****************************\n****************************\Red Escape:\n")
+		file.write("\n")
+	file.write("****************************\n****************************\nRed Escape:\n")
 
 	for node in redEscapedNodes:
+		file.write(start)
 		logSequence(node, file)
-		file.write("\n-\n")
+		file.write("\n")
 
 		
 
@@ -318,7 +319,7 @@ def createTree(startingPosition):
 
 if __name__ =="__main__":
         
-    createTree("21000435")
+    createTree("38173222")
 
 
 
