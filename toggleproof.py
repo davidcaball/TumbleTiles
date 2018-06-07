@@ -319,7 +319,7 @@ def createTree(startingPosition):
 
 if __name__ =="__main__":
         
-    createTree("38173222")
+    createTree("00200816")
 
 
 
