@@ -8,22 +8,37 @@ import time
 visitedPositions = Set()
 startingPositions = Set()
 stuckPositions = Set()
-redEscapedPosition = Set()
-solvedPositions = Set()
+redEscapedPositions = Set()
+solvedPositions1 = Set()
+solvedPositions2 = Set()
 solvedNodes = []
+redEscapedNodes = []
 board = None
+nodeCount = 0
+root = None
+solution = ""
+start =  ""
+
+
+stuckSetFile = "Coordinates/stuckCoordinates.txt"
+
+startSetFile = "Coordinates/startCoordinates.txt"
+
+redEscSetFile = "Coordinates/redEscCoordinates.txt"
 
 
 class Tree(object):
 	def __init__(self, coordinates):
 		self.coordinates = coordinates
-		self.up = None
-		self.down = None
-		self.right = None
-		self.left = None
+		self.directionFromParent = ""
+		self.north = None
+		self.south = None
+		self.east = None
+		self.west = None
 		self.stuck = False
 		self.redundant = False
 		self.solved = False
+		self.redEscaped = False
 		self.parent = None
 
 
@@ -32,14 +47,35 @@ def initializeSets():
 	startFile = open()
 
 # Takes a board and returns the coordinates of the red and blue tile in the correct format
-def getCoordinateString()
+def getCoordinateString():
 	global board
+	if len(board.Polyominoes[1].Tiles) == 4:
+		bluePoly = board.Polyominoes[1]
+	else:
+		print "error"
 
-	bluePoly = board.Polyominoes[1]
-	blueX = str(bluePoly.Tiles[0].x)  
-	blueY = str(bluePoly.Tiles[0].y) 
+	blueX = bluePoly.Tiles[0].x  
+	blueY = bluePoly.Tiles[0].y
 
-	redPoly = board.Polyominoes[0]
+	if bluePoly.Tiles[1].x < blueX or bluePoly.Tiles[1].y < blueY:
+		blueX = bluePoly.Tiles[1].x
+		blueY = bluePoly.Tiles[1].y
+
+	if bluePoly.Tiles[2].x < blueX or bluePoly.Tiles[2].y < blueY:
+		blueX = bluePoly.Tiles[2].x
+		blueY = bluePoly.Tiles[2].y
+
+	if bluePoly.Tiles[3].x < blueX or bluePoly.Tiles[3].y < blueY:
+		blueX = bluePoly.Tiles[3].x
+		blueY = bluePoly.Tiles[3].y
+
+	blueX = str(blueX)
+	blueY = str(blueY)
+
+	if len(board.Polyominoes[0].Tiles) == 1:
+		redPoly = board.Polyominoes[0]
+	else:
+		print "error"
 
 	redX = str(redPoly.Tiles[0].x)
 	redY = str(redPoly.Tiles[0].y)
@@ -53,7 +89,7 @@ def getCoordinateString()
 	if len(redY) == 1:
 		redY = "0" + redY
 	coordString = blueX + blueY + redX + redY
-	print(coordString)
+	# print(coordString)
 
 	return coordString
 
@@ -68,6 +104,8 @@ def revertBoardToStart(startingPosition):
 	redX = int(startingPosition[4:6])
 	redY = int(startingPosition[6:8])
 
+	print "BlueX: ", blueX, "\nBlueY: ", blueY, "\nRedX: ", redX, "\nRedY: ", redY
+	
 	bluePoly = board.Polyominoes[1]
 	bluePoly.Tiles[0].x = blueX
 	bluePoly.Tiles[0].y = blueY
@@ -86,51 +124,146 @@ def revertBoardToStart(startingPosition):
 	redPoly.Tiles[0].x = redX
 	redPoly.Tiles[0].y = redY
 
-def recurseTree(root, startingPosition):
+	print "Current Positions\n Blue:\n1: ", bluePoly.Tiles[0].x, ", ", bluePoly.Tiles[0].y, "\n2: ", bluePoly.Tiles[1].x, ", ", bluePoly.Tiles[1].y, "\n3: ", bluePoly.Tiles[2].x, ", ", bluePoly.Tiles[2].y, "\n4: ", bluePoly.Tiles[3].x, ", ", bluePoly.Tiles[3].y 
+	time.sleep(5)
+	# board.ActivateGlues()
 
+def recurseTree(root, startingPosition, direction):
+	global nodeCount
+	# print(nodeCount)
+	nodeCount = nodeCount + 1
 
 	newNode = Tree(startingPosition)
 	newNode.parent = root
+	newNode.directionFromParent = direction
 
-	if startingPosition is in visitedPositions:
+	print "CURRENT POSITION: ", getCoordinateString()
+
+	if startingPosition in visitedPositions:
 		newNode.redundant = True
 	else:
 		visitedPositions.add(startingPosition)
 
-	if startingPosition is in stuckPositions:
+	if startingPosition in stuckPositions:
 		newNode.stuck = True
 
-	if startingPosition is in solvedPositions:
+	if startingPosition[:4] == solution:
 		newNode.solve = True
 		solvedNodes.append(newNode)
+
+	if startingPosition[4:8] in redEscapedPositions:
+		newNode.redEscaped = True
+		redEscapedNodes.append(newNode)
+
 	
-	if !newNode.stuck and !newNode.redundant:
+	if not newNode.stuck and not newNode.redundant and not newNode.solved and not newNode.redEscaped:
 
-		board.tumble("N")
-		newNode.up = recurseTree(newNode, getCoordinateString())
+		board.Tumble("N")
+		newConfig = getCoordinateString()
+		if not newConfig == startingPosition and newConfig not in visitedPositions:
+			newNode.north = recurseTree(newNode, newConfig,"N")
 
-		revertBoardToStart()
-		board.tumble("S")
-		newNode.down = recurseTree(newNode, getCoordinateString())
+		revertBoardToStart(startingPosition)
 
-		revertBoardToStart()
-		board.tumble("E")
-		newNode.right = recurseTree(newNode, getCoordinateString())
+		board.Tumble("S")
+		newConfig = getCoordinateString()
+		if not newConfig == startingPosition and newConfig not in visitedPositions:
+			newNode.north = recurseTree(newNode, newConfig,"S")
 
-		revertBoardToStart()
-		board.tumble("W")
-		newNode.left = recurseTree(newNode, getCoordinateString())
+		revertBoardToStart(startingPosition)
+
+		board.Tumble("E")
+		newConfig = getCoordinateString()
+		if not newConfig == startingPosition and newConfig not in visitedPositions:
+			newNode.north = recurseTree(newNode, newConfig,"E")
+
+		revertBoardToStart(startingPosition)
+
+		board.Tumble("W")
+		newConfig = getCoordinateString()
+		if not newConfig == startingPosition and newConfig not in visitedPositions:
+			newNode.north = recurseTree(newNode, newConfig,"W")
 
 		return newNode
 
-	
+# Loads the positions for the stuck positions, solved positions, 
+# and red escaped positions into their respective sets
+def loadSets():
+	global stuckSetFile 
+	global startSetFile 
+	global redEscSetFile
 
+	stuckFile = open(stuckSetFile, "r")
+	startFile = open(startSetFile, "r")
+	redEscFile = open(redEscSetFile, "r")
+
+	for l in startFile.readlines():
+		startingPositions.add(l[:8])
+
+	for l in stuckFile.readlines():
+		stuckPositions.add(l[:8])
+
+	for l in redEscFile.readlines():
+		redEscapedPositions.add(l[:4])
+
+	print "Created Sets: \nSize of starting: ", len(startingPositions), "\nSize of stuck: ", len(stuckPositions), "\nLength of redEsc: ", len(redEscapedPositions)
+
+
+
+def printSequence(node):
+	if node.directionFromParent == "START":
+		return
+
+	printSequence(node.parent)
+
+	print node.directionFromParent, " - ", node.coordinates
+
+
+def logSequence(node, file):
+	if node.directionFromParent == "START":
+		return
+
+	logSequence(node.parent, file)
+
+	file.write(node.directionFromParent + ",")
+
+def logData():
+	file = open("Log/log.txt", "w")
+	file.write(start + "\n")
+	file.write("****************************\nSolutions:\n")
+	for node in solvedNodes:
+		logSequence(node, file)
+		file.write("\n-\n")
+
+	file.write("****************************\n****************************\Red Escape:\n")
+
+	for node in redEscapedNodes:
+		logSequence(node, file)
+		file.write("\n-\n")
+
+		
 
 
 def createTree(startingPosition):
+	global solution
 	global board
+	global root
+	global start
+	start = startingPosition
 	# Set to hold all position that have been visited
-	visitedPositions = Set()
+
+	loadSets()
+
+	#set determines if the solution should be in the blue in the bottom and right or
+	if startingPosition[:4] == "2100":
+		solution = "1838"
+	elif startingPosition[:4] == "0020":
+		solution = "3817"
+	elif startingPosition[:4] == "3817":
+		solution = "0020"
+	elif startingPosition[:4] == "1838":
+		solution = "2100"
+
 	root = Tree(startingPosition)
 	
 	# Gets the empty board from the .xml file
@@ -161,9 +294,12 @@ def createTree(startingPosition):
 	board.Add(redPoly)
 	board.Add(bluePoly)
 
-	recurseTree(root, startingPosition)
+	recurseTree(root, startingPosition, "START")
 
-	
+	print "Tree Creation Complete for: ", startingPosition, "\nTotal Nodes: ", nodeCount, "\nSolution Nodes: ", len(solvedNodes), "\nRed Esc Nodes:", len(redEscapedNodes)
+
+	printSequence(solvedNodes[0])
+	logData()
 	# for c in board.ConcreteTiles:
 	#  	print "concrete at ", c.x, ", ", c.y
 	# for p in board.Polyominoes:
@@ -182,7 +318,7 @@ def createTree(startingPosition):
 
 if __name__ =="__main__":
         
-    createTree("21003603")
+    createTree("21000435")
 
 
 

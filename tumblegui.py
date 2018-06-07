@@ -329,6 +329,31 @@ class tumblegui:
         elif event.keysym == "h":
             self.logStuckCoordinates()
 
+    def printCoordinateString(self):
+        global board
+
+        bluePoly = board.Polyominoes[1]
+        blueX = str(bluePoly.Tiles[0].x)  
+        blueY = str(bluePoly.Tiles[0].y) 
+
+        redPoly = board.Polyominoes[0]
+
+        redX = str(redPoly.Tiles[0].x)
+        redY = str(redPoly.Tiles[0].y)
+
+        if len(blueX) == 1:
+            blueX = "0" + blueX
+        if len(blueY) == 1:
+            blueY = "0" + blueY
+        if len(redX) == 1:
+            redX = "0" + redX
+        if len(redY) == 1:
+            redY = "0" + redY
+        coordString = blueX + blueY + redX + redY
+        # print(coordString)
+
+        return coordString
+
     def logStartingCoordinates(self):
         adding = True
         positionSet = Set()
@@ -339,7 +364,7 @@ class tumblegui:
         blueStart3 = "3817"
         blueStart4 = "1838"
 
-        file = open("coordinates.txt", "w")
+        file = open("Coordinates/startCoordinates.txt", "w")
         randToDirection = {'0':'N', '1':'E', '2':'S', '3':'W'}
         tile = self.board.Polyominoes[0].Tiles[0]
 
@@ -347,7 +372,7 @@ class tumblegui:
         tile.y = 3
 
         tileMoved = False
-        for x in range(0,2000):
+        for x in range(0,1000):
             stringX = str(tile.x)
             stringY = str(tile.y)
             coordString = ""
@@ -365,11 +390,13 @@ class tumblegui:
 
             if coordString not in redSet:
                 redSet.add(coordString)
-                print(coordString)    
-                file.write(blueStart1 + coordString + ",")
-                file.write(blueStart2 + coordString + ",")
-                file.write(blueStart3 + coordString + ",")
-                file.write(blueStart4 + coordString + ",")
+                print(coordString)
+                if not tileMoved == False:
+                    file.write(blueStart1 + coordString + "\n")
+                    file.write(blueStart2 + coordString + "\n")
+                else:
+                    file.write(blueStart3 + coordString + "\n")
+                    file.write(blueStart4 + coordString + "\n")
                 positionSet.add(blueStart1 + coordString)
                 positionSet.add(blueStart2 + coordString)
                 positionSet.add(blueStart3 + coordString)
@@ -377,7 +404,7 @@ class tumblegui:
 
             self.moveRandomDirection()
 
-            if tileMoved == False and x > 1000:
+            if tileMoved == False and x > 500:
                 tile.x = 4
                 tile.y = 35
                 tileMoved = True
@@ -423,7 +450,7 @@ class tumblegui:
 
             if coordString not in positionSet:
                 print(coordString)    
-                file.write(coordString + ",")
+                file.write(coordString + "\n")
                 positionSet.add(coordString)
                 positionSet.add(coordString)
                 positionSet.add(coordString)
