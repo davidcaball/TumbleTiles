@@ -570,7 +570,7 @@ class tumblegui:
 
             if coordString not in positionSet:
                 print(coordString)    
-                file.write(coordString + ",")
+                file.write(coordString + "\n")
                 positionSet.add(coordString)
                 positionSet.add(coordString)
                 positionSet.add(coordString)

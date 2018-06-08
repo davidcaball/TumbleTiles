@@ -95,7 +95,14 @@ def getCoordinateString():
 
 
 
+def printTileCoords():
+	bluePoly = board.Polyominoes[1]
 
+	print "Blue: ", bluePoly.Tiles[0].x, ", ", bluePoly.Tiles[0].y 
+
+	redPoly = board.Polyominoes[0]
+
+	print "Red: ", redPoly.Tiles[0].x, ", ", redPoly.Tiles[0].y
 
 def revertBoardToStart(startingPosition):
 	blueX = int(startingPosition[:2])
@@ -148,6 +155,9 @@ def recurseTree(root, startingPosition, direction):
 		newNode.stuck = True
 
 	if startingPosition[:4] == solution:
+		print "Solution: "
+		print(startingPosition[:4])
+		printTileCoords()
 		newNode.solve = True
 		solvedNodes.append(newNode)
 
@@ -160,28 +170,28 @@ def recurseTree(root, startingPosition, direction):
 
 		board.Tumble("N")
 		newConfig = getCoordinateString()
-		if not "N" == newNode.directionFromParent and newConfig not in visitedPositions:
+		if not "N" == newNode.directionFromParent and newConfig not in visitedPositions and newConfig != startingPosition:
 			newNode.north = recurseTree(newNode, newConfig,"N")
 
 		revertBoardToStart(startingPosition)
 
 		board.Tumble("S")
 		newConfig = getCoordinateString()
-		if not "S" == newNode.directionFromParent and newConfig not in visitedPositions:
+		if not "S" == newNode.directionFromParent and newConfig not in visitedPositions and newConfig != startingPosition:
 			newNode.north = recurseTree(newNode, newConfig,"S")
 
 		revertBoardToStart(startingPosition)
 
 		board.Tumble("E")
 		newConfig = getCoordinateString()
-		if not "E" == newNode.directionFromParent and newConfig not in visitedPositions:
+		if not "E" == newNode.directionFromParent and newConfig not in visitedPositions and newConfig != startingPosition:
 			newNode.north = recurseTree(newNode, newConfig,"E")
 
 		revertBoardToStart(startingPosition)
 
 		board.Tumble("W")
 		newConfig = getCoordinateString()
-		if not "W" == newNode.directionFromParent and newConfig not in visitedPositions:
+		if not "W" == newNode.directionFromParent and newConfig not in visitedPositions and newConfig != startingPosition:
 			newNode.north = recurseTree(newNode, newConfig,"W")
 
 		return newNode
@@ -200,8 +210,8 @@ def loadSets():
 	for l in startFile.readlines():
 		startingPositions.add(l[:8])
 
-	for l in stuckFile.readlines():
-		stuckPositions.add(l[:8])
+	# for l in stuckFile.readlines():
+	# 	stuckPositions.add(l[:8])
 
 	for l in redEscFile.readlines():
 		redEscapedPositions.add(l[:4])
@@ -246,22 +256,22 @@ def logData():
 
 
 def createTree(startingPosition):
+	global nodeCount
 	global solution
 	global board
 	global root
 	global start
+	global solvedNodes
+	global visitedPositions
+	global redEscapedNodes
 	start = startingPosition
 	# Set to hold all position that have been visited
-
-	
+	nodeCount = 0
+	solvedNodes = []
+	redEscapedNodes = []
+	visitedPositions.clear()
 
 	#set determines if the solution should be in the blue in the bottom and right or
-
-
-	blueStart1 = "2100" #NORTH
-        blueStart2 = "3817" #EAST
-        blueStart3 = "1838" #SOUTH
-        blueStart4 = "0020" #WEST
 
 	if startingPosition[:4] == "2100":
 		solution = "1838"
@@ -327,7 +337,8 @@ def createTree(startingPosition):
 if __name__ =="__main__":
     loadSets()
     for start in startingPositions:
-    		createTree(start)
+    	createTree(start)
+    # createTree("38173603")
 
 
 
