@@ -104,7 +104,7 @@ def revertBoardToStart(startingPosition):
 	redX = int(startingPosition[4:6])
 	redY = int(startingPosition[6:8])
 
-	print "BlueX: ", blueX, "\nBlueY: ", blueY, "\nRedX: ", redX, "\nRedY: ", redY
+	# print "BlueX: ", blueX, "\nBlueY: ", blueY, "\nRedX: ", redX, "\nRedY: ", redY
 	
 	bluePoly = board.Polyominoes[1]
 	bluePoly.Tiles[0].x = blueX
@@ -124,7 +124,7 @@ def revertBoardToStart(startingPosition):
 	redPoly.Tiles[0].x = redX
 	redPoly.Tiles[0].y = redY
 
-	print "Current Positions\n Blue:\n1: ", bluePoly.Tiles[0].x, ", ", bluePoly.Tiles[0].y, "\n2: ", bluePoly.Tiles[1].x, ", ", bluePoly.Tiles[1].y, "\n3: ", bluePoly.Tiles[2].x, ", ", bluePoly.Tiles[2].y, "\n4: ", bluePoly.Tiles[3].x, ", ", bluePoly.Tiles[3].y 
+	# print "Current Positions\n Blue:\n1: ", bluePoly.Tiles[0].x, ", ", bluePoly.Tiles[0].y, "\n2: ", bluePoly.Tiles[1].x, ", ", bluePoly.Tiles[1].y, "\n3: ", bluePoly.Tiles[2].x, ", ", bluePoly.Tiles[2].y, "\n4: ", bluePoly.Tiles[3].x, ", ", bluePoly.Tiles[3].y 
 	# time.sleep(5)
 	# board.ActivateGlues()
 
@@ -137,7 +137,7 @@ def recurseTree(root, startingPosition, direction):
 	newNode.parent = root
 	newNode.directionFromParent = direction
 
-	print "CURRENT POSITION: ", getCoordinateString()
+	# print "CURRENT POSITION: ", getCoordinateString()
 
 	if startingPosition in visitedPositions:
 		newNode.redundant = True
@@ -228,14 +228,14 @@ def logSequence(node, file):
 	file.write(node.directionFromParent)
 
 def logData():
-	file = open("Log/log.txt", "w")
-	file.write(start + "\n")
+	file = open("Log/log.txt", "a")
+	file.write("\n" + start + "\n")
 	file.write("****************************\nSolutions:\n")
 	for node in solvedNodes:
 		file.write(start)
 		logSequence(node, file)
 		file.write("\n")
-	file.write("****************************\n****************************\nRed Escape:\n")
+	file.write("****************************\nRed Escape:\n")
 
 	for node in redEscapedNodes:
 		file.write(start)
@@ -253,7 +253,7 @@ def createTree(startingPosition):
 	start = startingPosition
 	# Set to hold all position that have been visited
 
-	loadSets()
+	
 
 	#set determines if the solution should be in the blue in the bottom and right or
 	if startingPosition[:4] == "2100":
@@ -299,7 +299,7 @@ def createTree(startingPosition):
 
 	print "Tree Creation Complete for: ", startingPosition, "\nTotal Nodes: ", nodeCount, "\nSolution Nodes: ", len(solvedNodes), "\nRed Esc Nodes:", len(redEscapedNodes)
 
-	printSequence(solvedNodes[0])
+	# printSequence(solvedNodes[0])
 	logData()
 	# for c in board.ConcreteTiles:
 	#  	print "concrete at ", c.x, ", ", c.y
@@ -318,8 +318,9 @@ def createTree(startingPosition):
 
 
 if __name__ =="__main__":
-        
-    createTree("00200816")
+    loadSets()
+    for start in startingPositions:
+    		createTree(start)
 
 
 

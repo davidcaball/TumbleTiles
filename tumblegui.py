@@ -28,7 +28,7 @@ except ImportError:
 
 LOGFILE = None
 LOGFILENAME = ""
-TILESIZE = 20
+TILESIZE = 15
 VERSION = "1.5"
 LASTLOADEDFILE = ""
 
@@ -416,6 +416,8 @@ class tumblegui:
 
         self.board.remapArray()
         self.board.verifyTileLocations()
+        self.callCanvasRedraw()
+        self.w.update_idletasks()
 
 
     def logStartingCoordinates(self):
@@ -455,10 +457,9 @@ class tumblegui:
             if coordString not in redSet:
                 redSet.add(coordString)
                 print(coordString)
-                if not tileMoved == False:
+                if True:
                     file.write(blueStart1 + coordString + "\n")
                     file.write(blueStart2 + coordString + "\n")
-                else:
                     file.write(blueStart3 + coordString + "\n")
                     file.write(blueStart4 + coordString + "\n")
                 positionSet.add(blueStart1 + coordString)

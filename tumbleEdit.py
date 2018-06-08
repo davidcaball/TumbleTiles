@@ -13,11 +13,25 @@ import os,sys
 #the x and y coordinate that the preview tiles will begin to be drawn on
 PREVTILESTARTX = 20
 PREVTILESTARTY = 21
-TILESIZE = 20
+TILESIZE = 15
 PREVTILESIZE = 70
 
 NEWTILEWINDOW_W = 150
 NEWTILEWINDOW_H = 180
+
+
+MODS = {
+    0x0001: 'Shift',
+    0x0002: 'Caps Lock',
+    0x0004: 'Control',
+    0x0008: 'Left-hand Alt',
+    0x0010: 'Num Lock',
+    0x0080: 'Right-hand Alt',
+    0x0100: 'Mouse button 1',
+    0x0200: 'Mouse button 2',
+    0x0400: 'Mouse button 3'
+}
+
 
 class TileEditorGUI:
 	def __init__(self, parent, tumbleGUI, board, glue_data, previewTileList):
@@ -75,7 +89,7 @@ class TileEditorGUI:
 		self.concreteChecked = IntVar()
 
 		#populate the array
-		self.populateArray()
+		# self.populateArray()
 
 
 		#//////////////////
@@ -85,6 +99,12 @@ class TileEditorGUI:
 		self.newWindow.wm_title("Editor")
 		self.newWindow.resizable(False, False)
 		self.newWindow.protocol("WM_DELETE_WINDOW", lambda: self.closeGUI())
+
+		self.newWindow.bind("<Key>", self.keyPressed)
+		self.newWindow.bind("<Up>", self.keyPressed)
+		self.newWindow.bind("<Right>", self.keyPressed)
+		self.newWindow.bind("<Down>", self.keyPressed)
+		self.newWindow.bind("<Left>", self.keyPressed)
 
 		#Add Menu Bar
 		self.menuBar = Menu(self.newWindow, relief=RAISED, borderwidth=1)
@@ -129,6 +149,54 @@ class TileEditorGUI:
 		#draw the board on the canvas
 		self.popWinTiles()
 		self.redrawPrev()
+
+	def keyPressed(self, event):
+		print(event.keysym)
+		if True:
+			if event.keysym == "Up":
+				print("Moving up")
+				self.stepAllTiles("N")
+			elif event.keysym == "Right":
+				print("Moving Right")
+				self.stepAllTiles("E")
+			elif event.keysym == "Down":
+				print("Moving Down")
+				self.stepAllTiles("S")
+			elif event.keysym == "Left":
+				print("Mving Left")
+				self.stepAllTiles("W")
+
+	def stepAllTiles(self, direction):
+		print "STEPPING", direction	
+		dx = 0
+		dy = 0
+
+		if direction == "N":
+			dy = -1
+		elif direction == "S":
+			dy = 1
+		elif direction == "E":
+			dx = 1
+		elif direction == "W":
+			dx = -1
+
+		for p in self.board.Polyominoes:
+			for tile in p.Tiles:
+				if tile.x + dx >= 0 and tile.x < self.board.Cols:
+						tile.x = tile.x + dx
+				if tile.x + dx >= 0 and tile.x < self.board.Cols:	
+						tile.y = tile.y + dy
+
+		    
+		for tile in self.board.ConcreteTiles:
+			if tile.x + dx >= 0 and tile.x + dx < self.board.Cols:
+				tile.x = tile.x + dx
+			if tile.y + dy >= 0 and tile.y + dy < self.board.Rows:			
+				tile.y = tile.y + dy
+
+		self.redrawPrev()
+		self.board.remapArray()
+
 
 	# Called when you click to add a new tile. Will create a small window where you can insert the 4 glues, then add that tile to the
 	# preview tile window
@@ -321,7 +389,7 @@ class TileEditorGUI:
 		self.newWindow.geometry(str(self.board_w*self.tile_size + self.tilePrevCanvas.winfo_width() + 20)+'x'+str(self.board_h*self.tile_size+76))
 		self.BoardCanvas.config(width=self.board_w*self.tile_size, height=self.board_h*self.tile_size)
 		self.BoardCanvas.pack(side=LEFT)
-		self.populateArray()
+		# self.populateArray()
 		self.redrawPrev()
 
 	def getTileIndex(self, widget_name):
@@ -348,21 +416,21 @@ class TileEditorGUI:
 			self.addTileAtPos(event.x/self.tile_size, event.y/self.tile_size)
 
 	def removeTileAtPos(self, x, y):
-		tile = self.coord2tile[x][y]
+		tile = self.board.coordToTile[x][y]
 
 		if tile == None:
 			return
 
 		if tile.isConcrete:
 			self.board.ConcreteTiles.remove(tile)
-			self.coord2tile[x][y] = None
+			self.board.coordToTile[x][y] = None
 		
 		else:
 			tile.parent.Tiles.remove(tile) #remove tile from the polyomino that its in
 			if len(tile.parent.Tiles) == 0:
 				self.board.Polyominoes.remove(tile.parent) #remove polyomino from the array
 			
-			self.coord2tile[x][y] = None
+			self.board.coordToTile[x][y] = None
 
 		self.board.coordToTile[x][y]= None
 
@@ -378,7 +446,7 @@ class TileEditorGUI:
 		
 		i = self.selectedTileIndex
 
-		if self.coord2tile[x][y] != None:
+		if self.board.coordToTile[x][y] != None:
 			return
 
 
@@ -392,12 +460,12 @@ class TileEditorGUI:
 		if not self.prevTileList[i].isConcrete:
 			newPoly = TT.Polyomino(0, x, y, self.prevTileList[i].glues, color)
 			self.board.Add(newPoly)
-			self.coord2tile[x][y] = newPoly.Tiles[0]
+			self.board.coordToTile[x][y] = newPoly.Tiles[0]
 			self.board.coordToTile[x][y]= newPoly.Tiles[0]
 		else:
 			newConcTile = TT.Tile(None, 0, x, y, [], self.prevTileList[i].color, "True")
 			self.board.AddConc(newConcTile)
-			self.coord2tile[x][y] = newConcTile
+			self.board.coordToTile[x][y] = newConcTile
 			self.board.coordToTile[x][y]= newConcTile
 
 
@@ -408,12 +476,12 @@ class TileEditorGUI:
 		verified = True
 		for p in self.board.Polyominoes:
 			for tile in p.Tiles:
-				if self.coord2tile[tile.x][tile.y] != tile:
+				if self.board.coordToTile[x][y] != tile:
 					print "ERROR: Tile at ", tile.x, ", ", tile.y, " is not in array properly \n",
 					verified = False
 
 		for tile in self.board.ConcreteTiles:
-			if self.coord2tile[tile.x][tile.y] != tile:
+			if self.board.coordToTile[x][y] != tile:
 				print "ERROR: Tile at ", tile.x, ", ", tile.y, " is not in array properly \n",
 				verified = False
 
