@@ -32,7 +32,7 @@ def redrawCanvas(board, boardwidth, boardheight, canvas, tilesize, textcolor = "
 	for c in board.ConcreteTiles:
 		count = count + 1
 		canvas.create_rectangle(tilesize*c.x, tilesize*c.y, tilesize*c.x + tilesize, tilesize*c.y + tilesize, fill = "#686868")
-		canvas.create_text(tilesize*c.x + tilesize/2, tilesize*c.y + tilesize/2, text = str(count), fill="#FF0000", font=('',tilesize/3) )
+		# canvas.create_text(tilesize*c.x + tilesize/2, tilesize*c.y + tilesize/2, text = str(count), fill="#FF0000", font=('',tilesize/3) )
 
 def drawGrid(board, boardwidth, boardheight, canvas, tilesize, gridcolor = "#000000", b_drawGrid = False, b_drawLoc = False):
 

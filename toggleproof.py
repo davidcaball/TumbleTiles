@@ -256,19 +256,26 @@ def createTree(startingPosition):
 	
 
 	#set determines if the solution should be in the blue in the bottom and right or
+
+
+	blueStart1 = "2100" #NORTH
+        blueStart2 = "3817" #EAST
+        blueStart3 = "1838" #SOUTH
+        blueStart4 = "0020" #WEST
+
 	if startingPosition[:4] == "2100":
 		solution = "1838"
-	elif startingPosition[:4] == "0020":
-		solution = "3817"
 	elif startingPosition[:4] == "3817":
 		solution = "0020"
 	elif startingPosition[:4] == "1838":
 		solution = "2100"
+	elif startingPosition[:4] == "0020":
+		solution = "3817"
 
 	root = Tree(startingPosition)
 	
 	# Gets the empty board from the .xml file
-	boardData = parseFile("Examples/emptyboard.xml")
+	boardData = parseFile("Examples/emptyboardold.xml")
 	board = boardData[0]
 
 	

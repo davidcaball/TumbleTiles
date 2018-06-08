@@ -425,10 +425,10 @@ class tumblegui:
         positionSet = Set()
         redSet = Set()
 
-        blueStart1 = "2100"
-        blueStart2 = "0020"
-        blueStart3 = "3817"
-        blueStart4 = "1838"
+        blueStart1 = "2100" #NORTH
+        blueStart2 = "3817" #EAST
+        blueStart3 = "1838" #SOUTH
+        blueStart4 = "0020" #WEST
 
         file = open("Coordinates/startCoordinates.txt", "w")
         randToDirection = {'0':'N', '1':'E', '2':'S', '3':'W'}
@@ -457,11 +457,13 @@ class tumblegui:
             if coordString not in redSet:
                 redSet.add(coordString)
                 print(coordString)
-                if True:
-                    file.write(blueStart1 + coordString + "\n")
-                    file.write(blueStart2 + coordString + "\n")
+                if tileMoved:
                     file.write(blueStart3 + coordString + "\n")
                     file.write(blueStart4 + coordString + "\n")
+                else:
+                    file.write(blueStart1 + coordString + "\n")
+                    file.write(blueStart2 + coordString + "\n")
+
                 positionSet.add(blueStart1 + coordString)
                 positionSet.add(blueStart2 + coordString)
                 positionSet.add(blueStart3 + coordString)
