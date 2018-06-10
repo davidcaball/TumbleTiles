@@ -420,64 +420,6 @@ class tumblegui:
         self.w.update_idletasks()
 
 
-    def logStartingCoordinates(self):
-        adding = True
-        positionSet = Set()
-        redSet = Set()
-
-        blueStart1 = "2100" #NORTH
-        blueStart2 = "3817" #EAST
-        blueStart3 = "1838" #SOUTH
-        blueStart4 = "0020" #WEST
-
-        file = open("Coordinates/startCoordinates.txt", "w")
-        randToDirection = {'0':'N', '1':'E', '2':'S', '3':'W'}
-        tile = self.board.Polyominoes[0].Tiles[0]
-
-        tile.x = 36
-        tile.y = 3
-
-        tileMoved = False
-        for x in range(0,1000):
-            stringX = str(tile.x)
-            stringY = str(tile.y)
-            coordString = ""
-
-            if len(stringX) == 1:
-                coordString = "0"
-            coordString = coordString + stringX
-
-            if len(stringY) == 1:
-                coordString = coordString + "0"
-            coordString = coordString + stringY
-
-
-            
-
-            if coordString not in redSet:
-                redSet.add(coordString)
-                print(coordString)
-                if tileMoved:
-                    file.write(blueStart3 + coordString + "\n")
-                    file.write(blueStart4 + coordString + "\n")
-                else:
-                    file.write(blueStart1 + coordString + "\n")
-                    file.write(blueStart2 + coordString + "\n")
-
-                positionSet.add(blueStart1 + coordString)
-                positionSet.add(blueStart2 + coordString)
-                positionSet.add(blueStart3 + coordString)
-                positionSet.add(blueStart4 + coordString)
-
-            self.moveRandomDirection()
-
-            if tileMoved == False and x > 500:
-                tile.x = 4
-                tile.y = 35
-                tileMoved = True
-
-        print "Length of the set is ", len(positionSet)
-
     def logStuckCoordinates(self):
         adding = True
         positionSet = Set()

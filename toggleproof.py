@@ -2,9 +2,31 @@ import tumbletiles as TT
 from sets import Set
 from getFile import getFile, parseFile
 import time
+import random
 
-#										"[bluex][bluey][redx][redy]"
+#	"[bluex][bluey][redx][redy]"
 # Structure for starting and end coordinates is "21003603"
+
+# Since calculating the starting coordinates is costly, only run it if you want to check different positions
+recalcStart = True
+
+blueStartN = "2903" #NORTH
+blueStartE = "5125" #EAST
+blueStartS = "2650" #SOUTH
+blueStartW = "0428" #WEST
+
+redPath1 = "4411" #The North East path the red is trapped in
+redPath2 = "1243" #The South West path the red is trapped in
+
+#Empty board must not have any tiles on it
+emptyBoardFile = "Examples/finalempty.xml"
+
+#Location where the starting coordinates will be saved
+startFile = "Coordinates/startCoordinates.txt"
+
+# 'valid' 'invalid' 'all' which positions the script will check for
+checkFor = "invalid"
+
 visitedPositions = Set()
 startingPositions = Set()
 stuckPositions = Set()
@@ -18,6 +40,7 @@ nodeCount = 0
 root = None
 solution = ""
 start =  ""
+solutions = 0
 
 
 stuckSetFile = "Coordinates/stuckCoordinates.txt"
@@ -41,6 +64,102 @@ class Tree(object):
 		self.redEscaped = False
 		self.parent = None
 
+def moveRandomDirection():
+    randToDirection = {'0':'N', '1':'E', '2':'S', '3':'W'}
+    rand = random.randint(0,3)
+    dir = randToDirection.get(str(rand))
+    board.Tumble(dir)
+
+
+def logStartingCoordinates():
+	global blueStartN
+	global blueStartE
+	global blueStartS
+	global blueStartW
+	global emptyBoardFile
+	global redPath1
+	global redPath2
+	global startFile
+	global checkFor
+
+	checkValid = False
+	checkInvalid = False
+	checkAll = False
+
+	if checkFor == 'valid':
+		print("checking for valid")
+		checkValid = True
+	if checkFor == 'invalid':
+		print("checking for invalid")
+		checkInvalid = True
+	if checkFor == 'all':
+		print("checking for all")
+		checkAll = True
+
+	redX1 = int(redPath1[:2])
+	redY1 = int(redPath1[2:4])
+
+	redX2 = int(redPath2[:2])
+	redY2 = int(redPath2[2:4])
+
+	redGlues = ["S","S","S","S"]
+
+	positionSet = Set()
+	redSet = Set()
+
+	
+
+	file = open(startFile, "w")
+
+	redPoly = TT.Polyomino(0, redX1, redY1, redGlues, "#ff0000")
+	board.Add(redPoly)
+
+	tile = board.Polyominoes[0].Tiles[0]
+
+	tile.x = redX1
+	tile.y = redX2
+
+	tileMoved = False
+	for x in range(0,1000):
+	    stringX = str(tile.x)
+	    stringY = str(tile.y)
+	    coordString = ""
+
+	    if len(stringX) == 1:
+	        coordString = "0"
+	    coordString = coordString + stringX
+
+	    if len(stringY) == 1:
+	        coordString = coordString + "0"
+	    coordString = coordString + stringY
+
+	    if coordString not in redSet:
+	        redSet.add(coordString)
+	        print(coordString)
+
+	        if (not tileMoved and checkValid) or (tileMoved and checkInvalid) or checkAll:
+	            file.write(blueStartN + coordString + "\n")
+	            file.write(blueStartE + coordString + "\n")
+	        if (tileMoved and checkValid) or (not tileMoved and checkInvalid) or checkAll:
+	            file.write(blueStartS + coordString + "\n")
+	            file.write(blueStartW + coordString + "\n")
+
+	        positionSet.add(blueStartN + coordString)
+	        positionSet.add(blueStartW + coordString)
+	        positionSet.add(blueStartS + coordString)
+	        positionSet.add(blueStartE + coordString)
+
+	    moveRandomDirection()
+
+
+	    if tileMoved == False and x > 500:
+	        tile.x = redX2
+	        tile.y = redY2
+	        tileMoved = True
+
+	print "Length of the set is ", len(positionSet)
+
+	board.Polyominoes.remove(redPoly)
 
 # Fills all the sets with data from the text files
 def initializeSets():
@@ -198,7 +317,8 @@ def recurseTree(root, startingPosition, direction):
 
 # Loads the positions for the stuck positions, solved positions, 
 # and red escaped positions into their respective sets
-def loadSets():
+# adds the blue tile to the board
+def initialize():
 	global stuckSetFile 
 	global startSetFile 
 	global redEscSetFile
@@ -216,7 +336,27 @@ def loadSets():
 	for l in redEscFile.readlines():
 		redEscapedPositions.add(l[:4])
 
+
+
+
+
 	print "Created Sets: \nSize of starting: ", len(startingPositions), "\nSize of stuck: ", len(stuckPositions), "\nLength of redEsc: ", len(redEscapedPositions)
+
+	blueGlues = ["N","N","N","N"]
+	redGlues = ["S","S","S","S"]
+
+
+	bluePoly = TT.Polyomino(1, 0, 0, blueGlues, "#0000ff")
+	redPoly = TT.Polyomino(0, board.Rows - 1, board.Cols - 1, redGlues, "#ff0000")
+	board.Add(redPoly)
+	board.Add(bluePoly)
+
+	# Add the rest of the tiles to the blue square
+	bluePoly.Tiles.append(TT.Tile(bluePoly, 1, 1, 0, blueGlues, "#0000ff", False))
+	bluePoly.Tiles.append(TT.Tile(bluePoly, 1, 0, 1, blueGlues, "#0000ff", False))
+	bluePoly.Tiles.append(TT.Tile(bluePoly, 1, 1, 1, blueGlues, "#0000ff", False))
+
+	print "Added blue tile at", board.Polyominoes[1].Tiles[0]
 
 
 
@@ -264,6 +404,14 @@ def createTree(startingPosition):
 	global solvedNodes
 	global visitedPositions
 	global redEscapedNodes
+	global blueStartN
+	global blueStartE
+	global blueStartS
+	global blueStartW
+	global solutions
+
+	revertBoardToStart(startingPosition)
+
 	start = startingPosition
 	# Set to hold all position that have been visited
 	nodeCount = 0
@@ -273,72 +421,54 @@ def createTree(startingPosition):
 
 	#set determines if the solution should be in the blue in the bottom and right or
 
-	if startingPosition[:4] == "2100":
-		solution = "1838"
-	elif startingPosition[:4] == "3817":
-		solution = "0020"
-	elif startingPosition[:4] == "1838":
-		solution = "2100"
-	elif startingPosition[:4] == "0020":
-		solution = "3817"
+	if startingPosition[:4] == blueStartN:
+		solution = blueStartS
+	elif startingPosition[:4] == blueStartS:
+		solution = blueStartN
+	elif startingPosition[:4] == blueStartE:
+		solution = blueStartW
+	elif startingPosition[:4] == blueStartW:
+		solution = blueStartE
 
 	root = Tree(startingPosition)
 	
-	# Gets the empty board from the .xml file
-	boardData = parseFile("Examples/emptyboardold.xml")
-	board = boardData[0]
-
-	
-
-	blueGlues = ["N","N","N","N"]
-	redGlues = ["S","S","S","S"]
-
-	#use the starting position to position the initial tiles
-	blueX = int(startingPosition[:2])
-	blueY = int(startingPosition[2:4])
-
-	redX = int(startingPosition[4:6])
-	redY = int(startingPosition[6:8])
-
-	# Create the polyomino objects
-	bluePoly = TT.Polyomino(1, blueX, blueY, blueGlues, "#0000ff")
-	redPoly = TT.Polyomino(0, redX, redY, redGlues, "#ff0000")
-
-	# Add the rest of the tiles to the blue square
-	bluePoly.Tiles.append(TT.Tile(bluePoly, 1, blueX + 1, blueY, blueGlues, "#0000ff", False))
-	bluePoly.Tiles.append(TT.Tile(bluePoly, 1, blueX, blueY + 1, blueGlues, "#0000ff", False))
-	bluePoly.Tiles.append(TT.Tile(bluePoly, 1, blueX + 1, blueY + 1, blueGlues, "#0000ff", False))
-
-	board.Add(redPoly)
-	board.Add(bluePoly)
 
 	recurseTree(root, startingPosition, "START")
 
 	print "Tree Creation Complete for: ", startingPosition, "\nTotal Nodes: ", nodeCount, "\nSolution Nodes: ", len(solvedNodes), "\nRed Esc Nodes:", len(redEscapedNodes)
 
-	# printSequence(solvedNodes[0])
 	logData()
-	# for c in board.ConcreteTiles:
-	#  	print "concrete at ", c.x, ", ", c.y
-	# for p in board.Polyominoes:
-	#  	for tile in p.Tiles:
-	#  		print "tile of id ", tile.id, " at ", tile.x, ", ", tile.y
+	if len(solvedNodes) > 0:
+		solutions = solutions + 1
 
-	# for c in board.ConcreteTiles:
-	#  	for x in board.ConcreteTiles:
-	#  		if c != x:
-	#  			if c.x == x.x and c.y == x.y:
-	#  				print "tile ", c, " and tile ", x, " are both at ", c.x, ", ", c.y
-	# print "number of concrete tiles: ", len(board.ConcreteTiles)
+
+def loadBoard():
+	global board
+
+	boardData = parseFile(emptyBoardFile)
+	board = boardData[0]
+
+
 
 
 
 
 if __name__ =="__main__":
-    loadSets()
-    for start in startingPositions:
-    	createTree(start)
-    # createTree("38173603")
+	global solutions
+
+	solutions = 0
+	loadBoard()
+
+	if recalcStart:
+		logStartingCoordinates()
+
+	initialize()
+
+	for start in startingPositions:
+		createTree(start)
+
+	print "Number of paths with a solution: ", solutions
+	# createTree("26504330")
 
 
 
