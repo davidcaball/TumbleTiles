@@ -25,7 +25,7 @@ emptyBoardFile = "Examples/finalempty.xml"
 startFile = "Coordinates/startCoordinates.txt"
 
 # 'valid' 'invalid' 'all' which positions the script will check for
-checkFor = "invalid"
+checkFor = "valid"
 
 visitedPositions = Set()
 startingPositions = Set()
@@ -86,14 +86,13 @@ def logStartingCoordinates():
 	checkInvalid = False
 	checkAll = False
 
+	print "Calculating ", checkFor, "starting positions..."
+
 	if checkFor == 'valid':
-		print("checking for valid")
 		checkValid = True
 	if checkFor == 'invalid':
-		print("checking for invalid")
 		checkInvalid = True
 	if checkFor == 'all':
-		print("checking for all")
 		checkAll = True
 
 	redX1 = int(redPath1[:2])
@@ -135,7 +134,7 @@ def logStartingCoordinates():
 
 	    if coordString not in redSet:
 	        redSet.add(coordString)
-	        print(coordString)
+	        # print(coordString)
 
 	        if (not tileMoved and checkValid) or (tileMoved and checkInvalid) or checkAll:
 	            file.write(blueStartN + coordString + "\n")
@@ -156,8 +155,6 @@ def logStartingCoordinates():
 	        tile.x = redX2
 	        tile.y = redY2
 	        tileMoved = True
-
-	print "Length of the set is ", len(positionSet)
 
 	board.Polyominoes.remove(redPoly)
 
@@ -274,9 +271,9 @@ def recurseTree(root, startingPosition, direction):
 		newNode.stuck = True
 
 	if startingPosition[:4] == solution:
-		print "Solution: "
-		print(startingPosition[:4])
-		printTileCoords()
+		# print "Solution: "
+		# print(startingPosition[:4])
+		# printTileCoords()
 		newNode.solve = True
 		solvedNodes.append(newNode)
 
@@ -340,7 +337,7 @@ def initialize():
 
 
 
-	print "Created Sets: \nSize of starting: ", len(startingPositions), "\nSize of stuck: ", len(stuckPositions), "\nLength of redEsc: ", len(redEscapedPositions)
+	print "Number of starting positions: ", len(startingPositions)
 
 	blueGlues = ["N","N","N","N"]
 	redGlues = ["S","S","S","S"]
@@ -356,7 +353,7 @@ def initialize():
 	bluePoly.Tiles.append(TT.Tile(bluePoly, 1, 0, 1, blueGlues, "#0000ff", False))
 	bluePoly.Tiles.append(TT.Tile(bluePoly, 1, 1, 1, blueGlues, "#0000ff", False))
 
-	print "Added blue tile at", board.Polyominoes[1].Tiles[0]
+	# print "Added blue tile at", board.Polyominoes[1].Tiles[0]
 
 
 
@@ -385,12 +382,12 @@ def logData():
 		file.write(start)
 		logSequence(node, file)
 		file.write("\n")
-	file.write("****************************\nRed Escape:\n")
+	# file.write("****************************\nRed Escape:\n")
 
-	for node in redEscapedNodes:
-		file.write(start)
-		logSequence(node, file)
-		file.write("\n")
+	# for node in redEscapedNodes:
+	# 	file.write(start)
+	# 	logSequence(node, file)
+	# 	file.write("\n")
 
 		
 
@@ -435,7 +432,8 @@ def createTree(startingPosition):
 
 	recurseTree(root, startingPosition, "START")
 
-	print "Tree Creation Complete for: ", startingPosition, "\nTotal Nodes: ", nodeCount, "\nSolution Nodes: ", len(solvedNodes), "\nRed Esc Nodes:", len(redEscapedNodes)
+	print "Tree Creation Complete for: ", startingPosition, "\nTotal Nodes: ", nodeCount, "\nSolution Nodes: ", len(solvedNodes)
+	# print "\nRed Esc Nodes:", len(redEscapedNodes)
 
 	logData()
 	if len(solvedNodes) > 0:
@@ -444,6 +442,8 @@ def createTree(startingPosition):
 
 def loadBoard():
 	global board
+
+	print "Loading empty board file from: ", emptyBoardFile, "..."
 
 	boardData = parseFile(emptyBoardFile)
 	board = boardData[0]
@@ -454,9 +454,6 @@ def loadBoard():
 
 
 if __name__ =="__main__":
-	global solutions
-
-	solutions = 0
 	loadBoard()
 
 	if recalcStart:
@@ -466,7 +463,7 @@ if __name__ =="__main__":
 
 	for start in startingPositions:
 		createTree(start)
-
+	print "\n\n******************************\n--Tree Creation Complete\n"
 	print "Number of paths with a solution: ", solutions
 	# createTree("26504330")
 
