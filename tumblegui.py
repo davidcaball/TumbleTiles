@@ -336,13 +336,12 @@ class tumblegui:
             self.logStuckCoordinates()
 
     def printCoordinateString(self):
-        global board
 
-        bluePoly = board.Polyominoes[1]
+        bluePoly = self.board.Polyominoes[1]
         blueX = str(bluePoly.Tiles[0].x)  
         blueY = str(bluePoly.Tiles[0].y) 
 
-        redPoly = board.Polyominoes[0]
+        redPoly = self.board.Polyominoes[0]
 
         redX = str(redPoly.Tiles[0].x)
         redY = str(redPoly.Tiles[0].y)
@@ -356,7 +355,7 @@ class tumblegui:
         if len(redY) == 1:
             redY = "0" + redY
         coordString = blueX + blueY + redX + redY
-        # print(coordString)
+        print(coordString)
 
         return coordString
 
@@ -375,15 +374,18 @@ class tumblegui:
         print(script)
         coords = script[:8]
         self.setCoordinatesFromString(coords)
+        print "START - ", coords
         self.callCanvasRedraw()
         sequence = script[8:]
         self.runSequence(sequence)
 
     def runSequence(self, sequence):
         for x in range(0, len(sequence)):
-            time.sleep(1)
-            print "Tumbling: ", sequence[x]
+            time.sleep(.3)
             self.MoveDirection(sequence[x])
+            print sequence[x], " - ",
+            self.printCoordinateString()
+            
             self.w.update_idletasks()
 
     # Sets the blue and red tile from a 8 character string "XXYYxxyy"

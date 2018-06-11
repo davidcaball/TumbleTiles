@@ -19,13 +19,13 @@ redPath1 = "4411" #The North East path the red is trapped in
 redPath2 = "1243" #The South West path the red is trapped in
 
 #Empty board must not have any tiles on it
-emptyBoardFile = "Examples/finalempty.xml"
+emptyBoardFile = "Examples/theemptyone.xml"
 
 #Location where the starting coordinates will be saved
 startFile = "Coordinates/startCoordinates.txt"
 
 # 'valid' 'invalid' 'all' which positions the script will check for
-checkFor = "valid"
+checkFor = "invalid"
 
 visitedPositions = Set()
 startingPositions = Set()
@@ -158,9 +158,6 @@ def logStartingCoordinates():
 
 	board.Polyominoes.remove(redPoly)
 
-# Fills all the sets with data from the text files
-def initializeSets():
-	startFile = open()
 
 # Takes a board and returns the coordinates of the red and blue tile in the correct format
 def getCoordinateString():
@@ -214,7 +211,7 @@ def getCoordinateString():
 def printTileCoords():
 	bluePoly = board.Polyominoes[1]
 
-	print "Blue: ", bluePoly.Tiles[0].x, ", ", bluePoly.Tiles[0].y 
+	print "Blue: ", bluePoly.Tiles[0].x, ", ", bluePoly.Tiles[0].y,"   ", bluePoly.Tiles[1].x, ", ", bluePoly.Tiles[1].y, "   ", bluePoly.Tiles[2].x, ", ", bluePoly.Tiles[2].y, "   ", bluePoly.Tiles[3].x, ", ", bluePoly.Tiles[3].y 
 
 	redPoly = board.Polyominoes[0]
 
@@ -247,6 +244,9 @@ def revertBoardToStart(startingPosition):
 	redPoly.Tiles[0].x = redX
 	redPoly.Tiles[0].y = redY
 
+	board.ActivateGlues()
+	board.remapArray()
+
 	# print "Current Positions\n Blue:\n1: ", bluePoly.Tiles[0].x, ", ", bluePoly.Tiles[0].y, "\n2: ", bluePoly.Tiles[1].x, ", ", bluePoly.Tiles[1].y, "\n3: ", bluePoly.Tiles[2].x, ", ", bluePoly.Tiles[2].y, "\n4: ", bluePoly.Tiles[3].x, ", ", bluePoly.Tiles[3].y 
 	# time.sleep(5)
 	# board.ActivateGlues()
@@ -259,6 +259,7 @@ def recurseTree(root, startingPosition, direction):
 	newNode = Tree(startingPosition)
 	newNode.parent = root
 	newNode.directionFromParent = direction
+
 
 	# print "CURRENT POSITION: ", getCoordinateString()
 
@@ -274,7 +275,7 @@ def recurseTree(root, startingPosition, direction):
 		# print "Solution: "
 		# print(startingPosition[:4])
 		# printTileCoords()
-		newNode.solve = True
+		newNode.solved = True
 		solvedNodes.append(newNode)
 
 	if startingPosition[4:8] in redEscapedPositions:
@@ -291,12 +292,15 @@ def recurseTree(root, startingPosition, direction):
 
 		revertBoardToStart(startingPosition)
 
+
 		board.Tumble("S")
 		newConfig = getCoordinateString()
 		if not "S" == newNode.directionFromParent and newConfig not in visitedPositions and newConfig != startingPosition:
 			newNode.north = recurseTree(newNode, newConfig,"S")
 
 		revertBoardToStart(startingPosition)
+
+
 
 		board.Tumble("E")
 		newConfig = getCoordinateString()
@@ -305,12 +309,13 @@ def recurseTree(root, startingPosition, direction):
 
 		revertBoardToStart(startingPosition)
 
+
 		board.Tumble("W")
 		newConfig = getCoordinateString()
 		if not "W" == newNode.directionFromParent and newConfig not in visitedPositions and newConfig != startingPosition:
 			newNode.north = recurseTree(newNode, newConfig,"W")
 
-		return newNode
+	return newNode
 
 # Loads the positions for the stuck positions, solved positions, 
 # and red escaped positions into their respective sets
@@ -319,6 +324,10 @@ def initialize():
 	global stuckSetFile 
 	global startSetFile 
 	global redEscSetFile
+
+	#Clear log file
+	file = open("Log/log.txt", "w")
+	file.write("")
 
 	stuckFile = open(stuckSetFile, "r")
 	startFile = open(startSetFile, "r")
@@ -359,6 +368,7 @@ def initialize():
 
 def printSequence(node):
 	if node.directionFromParent == "START":
+		print "START", " - ", node.coordinates
 		return
 
 	printSequence(node.parent)
@@ -409,6 +419,9 @@ def createTree(startingPosition):
 
 	revertBoardToStart(startingPosition)
 
+	print "Reverting to ", startingPosition
+	printTileCoords()
+
 	start = startingPosition
 	# Set to hold all position that have been visited
 	nodeCount = 0
@@ -440,6 +453,7 @@ def createTree(startingPosition):
 		solutions = solutions + 1
 
 
+
 def loadBoard():
 	global board
 
@@ -463,7 +477,9 @@ if __name__ =="__main__":
 
 	for start in startingPositions:
 		createTree(start)
-	print "\n\n******************************\n--Tree Creation Complete\n"
+	# print "\n\n******************************\n--Tree Creation Complete\n"
+	#createTree("51254024")
+
 	print "Number of paths with a solution: ", solutions
 	# createTree("26504330")
 
