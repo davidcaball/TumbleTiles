@@ -10,10 +10,10 @@ import random
 # Since calculating the starting coordinates is costly, only run it if you want to check different positions
 recalcStart = True
 
-blueStartN = "2903" #NORTH
-blueStartE = "5125" #EAST
-blueStartS = "2650" #SOUTH
-blueStartW = "0428" #WEST
+blueStartN = "2904" #NORTH
+blueStartE = "5025" #EAST
+blueStartS = "2649" #SOUTH
+blueStartW = "0528" #WEST
 
 redPath1 = "4411" #The North East path the red is trapped in
 redPath2 = "1243" #The South West path the red is trapped in
@@ -25,7 +25,7 @@ emptyBoardFile = "Examples/theemptyone.xml"
 startFile = "Coordinates/startCoordinates.txt"
 
 # 'valid' 'invalid' 'all' which positions the script will check for
-checkFor = "invalid"
+checkFor = "valid"
 
 visitedPositions = Set()
 startingPositions = Set()
@@ -251,6 +251,24 @@ def revertBoardToStart(startingPosition):
 	# time.sleep(5)
 	# board.ActivateGlues()
 
+# Check to see if athe blue square is trying to leave out of the hallway, which is not allowed
+def blueLeaving(startingPosition, newPosition, direction):
+	# return False
+	if startingPosition[:4] == blueStartN and direction == "N":
+		print("Blue trying to leave!")
+		return True
+	if startingPosition[:4] == blueStartE and direction == "E":
+		print("Blue trying to leave!")
+		return True
+	if startingPosition[:4] == blueStartS and direction == "S":
+		print("Blue trying to leave!")
+		return True
+	if startingPosition[:4] == blueStartW and direction == "W":
+		print("Blue trying to leave!")
+		return True
+
+	return False
+
 def recurseTree(root, startingPosition, direction):
 	global nodeCount
 	# print(nodeCount)
@@ -283,11 +301,11 @@ def recurseTree(root, startingPosition, direction):
 		redEscapedNodes.append(newNode)
 
 	
-	if not newNode.stuck and not newNode.redundant and not newNode.solved and not newNode.redEscaped:
+	if not newNode.solved and not newNode.redEscaped:
 
 		board.Tumble("N")
 		newConfig = getCoordinateString()
-		if not "N" == newNode.directionFromParent and newConfig not in visitedPositions and newConfig != startingPosition:
+		if not "N" == newNode.directionFromParent and newConfig not in visitedPositions and newConfig != startingPosition and not blueLeaving(startingPosition, newConfig, "N"):
 			newNode.north = recurseTree(newNode, newConfig,"N")
 
 		revertBoardToStart(startingPosition)
@@ -295,7 +313,7 @@ def recurseTree(root, startingPosition, direction):
 
 		board.Tumble("S")
 		newConfig = getCoordinateString()
-		if not "S" == newNode.directionFromParent and newConfig not in visitedPositions and newConfig != startingPosition:
+		if not "S" == newNode.directionFromParent and newConfig not in visitedPositions and newConfig != startingPosition and not blueLeaving(startingPosition,newConfig,  "S"):
 			newNode.north = recurseTree(newNode, newConfig,"S")
 
 		revertBoardToStart(startingPosition)
@@ -304,7 +322,7 @@ def recurseTree(root, startingPosition, direction):
 
 		board.Tumble("E")
 		newConfig = getCoordinateString()
-		if not "E" == newNode.directionFromParent and newConfig not in visitedPositions and newConfig != startingPosition:
+		if not "E" == newNode.directionFromParent and newConfig not in visitedPositions and newConfig != startingPosition and not blueLeaving(startingPosition,newConfig,  "E"):
 			newNode.north = recurseTree(newNode, newConfig,"E")
 
 		revertBoardToStart(startingPosition)
@@ -312,7 +330,7 @@ def recurseTree(root, startingPosition, direction):
 
 		board.Tumble("W")
 		newConfig = getCoordinateString()
-		if not "W" == newNode.directionFromParent and newConfig not in visitedPositions and newConfig != startingPosition:
+		if not "W" == newNode.directionFromParent and newConfig not in visitedPositions and newConfig != startingPosition and not blueLeaving(startingPosition,newConfig,  "W"):
 			newNode.north = recurseTree(newNode, newConfig,"W")
 
 	return newNode
@@ -341,10 +359,6 @@ def initialize():
 
 	for l in redEscFile.readlines():
 		redEscapedPositions.add(l[:4])
-
-
-
-
 
 	print "Number of starting positions: ", len(startingPositions)
 
