@@ -13,7 +13,7 @@ import os,sys
 #the x and y coordinate that the preview tiles will begin to be drawn on
 PREVTILESTARTX = 20
 PREVTILESTARTY = 21
-TILESIZE = 15
+TILESIZE = 25
 PREVTILESIZE = 70
 
 NEWTILEWINDOW_W = 150

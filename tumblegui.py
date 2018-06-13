@@ -16,6 +16,7 @@ from boardgui import redrawCanvas, drawGrid
 import os,sys
 from sets import Set
 import time
+import imageio as io
 #https://pypi.python.org/pypi/pyscreenshot
 
 try:
@@ -190,7 +191,8 @@ class tumblegui:
         self.root.bind("<Down>", self.keyPressed)
         self.root.bind("<Left>", self.keyPressed)
         self.root.bind("<Key>", self.keyPressed)
-        self.w.pack() 
+        self.w.pack()
+
         
         #menu
         #menu - https://www.tutorialspoint.com/python/tk_menu.htm
@@ -250,7 +252,9 @@ class tumblegui:
         
         
         scriptmenu = Menu(self.menubar, tearoff=0)
+        scriptmenu.add_command(label="Record Script", command=self.loadScript)
         scriptmenu.add_command(label="Run Script", command=self.loadScript)
+        scriptmenu.add_command(label="Export as Gif", command=self.createGif)
 
         self.menubar.add_cascade(label="File", menu=filemenu)
         self.menubar.add_cascade(label="Settings", menu=settingsmenu)
@@ -281,7 +285,11 @@ class tumblegui:
         self.toolbar.pack(side=TOP, fill=X)
         
         self.mainframe.pack()
-        
+
+
+        toolbarframeheight = 24
+        self.w.config(width=self.board.Cols*TILESIZE, height=self.board.Rows*TILESIZE)
+        self.root.geometry(str(self.board.Cols*TILESIZE)+'x'+str(self.board.Rows*TILESIZE+toolbarframeheight))
 
         
         #other class variables
@@ -315,6 +323,58 @@ class tumblegui:
         self.root.geometry(str(self.board.Cols*TILESIZE)+'x'+str(self.board.Rows*TILESIZE+toolbarframeheight))
         #redraw
         self.callCanvasRedraw()
+
+    def createGif(self):
+
+        filename = getFile()
+        file = open(filename, "r")
+
+        images = []
+
+        sequence = file.readlines()[0].rstrip('\n')
+
+        x = 0
+        y = 0
+        z = 0
+        while os.path.exists("Gifs/%s%s%s.gif" % (x, y, z)):
+            z = z + 1
+            if z == 10:
+                z = 0
+                y = y + 1
+            if y == 10:
+                y = 0
+                x = x + 1
+
+        gifPath = ("Gifs/%s%s%s.gif" % (x, y, z))
+
+
+        for x in range(0, len(sequence)):
+            imagePath = "Gifs/temp.png"
+            time.sleep(.3)
+            self.MoveDirection(sequence[x])
+            px = self.w.winfo_rootx() + self.w.winfo_x()
+            py = self.w.winfo_rooty() + self.w.winfo_y()
+            boardx = px + self.w.winfo_width() 
+            boardy = py + self.w.winfo_height()
+            grabcanvas = ImageGrab.grab(bbox=(px,py,boardx,boardy)).save(imagePath)
+            image = io.imread(imagePath)
+
+            images.append(image)
+            if x ==  0 or x == len(sequence) - 1:
+                images.append(image)
+                images.append(image)
+            
+            self.w.update_idletasks()
+        io.mimsave(gifPath, images, fps = 2)
+
+        if os.path.exists("Gifs/temp.png"):
+            os.remove("Gifs/temp.png")
+
+
+
+
+
+
 
     
 
