@@ -255,16 +255,16 @@ def revertBoardToStart(startingPosition):
 def blueLeaving(startingPosition, newPosition, direction):
 	# return False
 	if startingPosition[:4] == blueStartN and direction == "N":
-		print("Blue trying to leave!")
+		# print("Blue trying to leave!")
 		return True
 	if startingPosition[:4] == blueStartE and direction == "E":
-		print("Blue trying to leave!")
+		# print("Blue trying to leave!")
 		return True
 	if startingPosition[:4] == blueStartS and direction == "S":
-		print("Blue trying to leave!")
+		# print("Blue trying to leave!")
 		return True
 	if startingPosition[:4] == blueStartW and direction == "W":
-		print("Blue trying to leave!")
+		# print("Blue trying to leave!")
 		return True
 
 	return False
@@ -433,8 +433,8 @@ def createTree(startingPosition):
 
 	revertBoardToStart(startingPosition)
 
-	print "Reverting to ", startingPosition
-	printTileCoords()
+	# print "Reverting to ", startingPosition
+	# printTileCoords()
 
 	start = startingPosition
 	# Set to hold all position that have been visited
@@ -450,7 +450,7 @@ def createTree(startingPosition):
 	elif startingPosition[:4] == blueStartS:
 		solution = blueStartN
 	elif startingPosition[:4] == blueStartE:
-		solution = blueStartW
+		solution = blueStartN
 	elif startingPosition[:4] == blueStartW:
 		solution = blueStartE
 
