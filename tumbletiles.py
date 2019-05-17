@@ -398,7 +398,7 @@ class Board:
             print "Someone doesn't know what they're doing"
     
     # Steps all tiles in one direction
-    def Step(self, direction):
+    def Step(self, direction, recording=False):
         for p in self.Polyominoes:
             p.HasMoved = False
             
@@ -489,7 +489,7 @@ class Board:
         global SINGLESTEP
 
          # If in factory mode tiles will be removed if they hit the bottom wall
-        if FACTORYMODE and SINGLESTEP:
+        if FACTORYMODE and (SINGLESTEP or recording):
 
             deletedFlag = True
 

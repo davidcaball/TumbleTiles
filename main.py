@@ -330,6 +330,8 @@ class VideoExport:
         self.exportFileNameText = StringVar()   # Variabe for name of the output file
         self.exportText = StringVar()           # Variable for the text that logs the video output
 
+        self.animatedTiltsFlag = IntVar()
+        self.animatedTiltsFlag.set(0)
 
         # Set default amounts
 
@@ -356,7 +358,8 @@ class VideoExport:
         self.exportFileNameField = Entry(self.t, textvariable=self.exportFileNameText, width=5)
         
         
-
+        animatedTiltsCheckBox = Checkbutton(self.t, text="Animate Tilts", variable=self.animatedTiltsFlag)
+        
         # Horizontal starting points for the labels and the fields
 
         labelStartX=60
@@ -382,18 +385,20 @@ class VideoExport:
         browseButton = Button(self.t, text="Browse", command=self.openFileWindow)
         browseButton.place(x=fieldStartX, y=100, height=20)
 
+        animatedTiltsCheckBox.place(x=labelStartX + 50, y= 155)
 
-        self.exportLabel.place(x=labelStartX, y=155)
+
+        self.exportLabel.place(x=labelStartX, y=175)
         # Create a progres bar to show status of video export
 
         self.progress_var = DoubleVar() 
         self.progress=ttk.Progressbar(self.t,orient=HORIZONTAL,variable=self.progress_var,length=260,mode='determinate')
-        self.progress.place(x=50, y=175)
+        self.progress.place(x=50, y=190)
         
         # Place export button    
 
         exportButton = Button(self.t, text="Export", command=self.export)
-        exportButton.place(x=150, y=210)
+        exportButton.place(x=150, y=215)
 
 
         
@@ -427,6 +432,9 @@ class VideoExport:
     # into a gif
     def createGif(self):
 
+
+        if self.animatedTiltsFlag.get() == 1:
+            print("Animated Tilts Turned On")
 
         self.progress_var.set(0)        # Set progress bar to 0
         self.exportText.set("")         # Set the export text to blank
@@ -476,20 +484,29 @@ class VideoExport:
             self.progress_var.set(float(x)/seqLen * 100)    # Update progress bar
             self.t.update()                                 # update toplevel window
            
-            self.tumbleGUI.MoveDirection(sequence[x], redraw= False) # Move the board in the specified direction
 
-            # Call function to get and image in memory of the current state of the board, passing it the tile resolution and the line width to use
-            image = self.tumbleGUI.getImageOfBoard(self.tileResInt, lineWidthInt)
+            if self.animatedTiltsFlag.get():
 
-            # Append the returned image to the image array
-            images.append(image)
+                newImages = self.tumbleGUI.animatedTumble(sequence[x] ,self.tileResInt, lineWidthInt)
+                images = images + newImages
+
+            else:
+                self.tumbleGUI.MoveDirection(sequence[x], redraw= False) # Move the board in the specified direction
+
+                # Call function to get and image in memory of the current state of the board, passing it the tile resolution and the line width to use
+                image = self.tumbleGUI.getImageOfBoard(self.tileResInt, lineWidthInt)
+
+                # Append the returned image to the image array
+                images.append(image)
+
+
         
         # Save the image
 
         images[0].save(exportFile, save_all=True, append_images=images[1:], duration=framesPerSec, loop=1)
 
         # Set the export Text
-        self.exportText.set("Video saved at ./Videos/"+exportFile)
+        self.exportText.set("Video saved at ./"+exportFile)
 
         # Update the progress bar and update the toplevel to redraw the progress bar
 
@@ -891,6 +908,35 @@ class tumblegui:
             tileRes=tileResInt,
             lineWidth=lineWidthInt)
 
+    # This function is used when creating an animated gif. An animated gif needs a picture for
+    # every step so normal tilting cannot be used. Takes the tile resolution and lineWidth that will be used for the pictures
+    #  Will return an array of images, of each step in the tilt
+    def animatedTumble(self, direction, tileResInt, lineWidthInt):
+
+        images = []
+        image = self.getImageOfBoard(tileResInt, lineWidthInt)
+
+        #Append image a few times to add more frames between tilt
+        images.append(image)
+        images.append(image)
+        images.append(image)
+        images.append(image)
+
+
+
+        if direction == "N" or direction == "S" or direction == "E" or direction == "W":
+            images.append(self.getImageOfBoard(tileResInt, lineWidthInt))
+            StepTaken = self.board.Step(direction)
+            while StepTaken == True:
+                images.append(self.getImageOfBoard(tileResInt, lineWidthInt))
+                StepTaken = self.board.Step(direction)
+        else:
+            print "Someone doesn't know what they're doing"
+
+        self.board.ActivateGlues()
+
+        return images
+    
     # Call the sequence runner
     def runScript(self, file):
         self.scriptmenu.entryconfigure(1, label='Stop Script')
