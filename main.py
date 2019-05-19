@@ -419,7 +419,7 @@ class VideoExport:
 
         self.tileResInt = int(self.tileRes.get())
 
-        self.createGif()
+        self.createVideo()
 
         # Delete the current board and restore the old board
         del(self.tumbleGUI.board)
@@ -430,7 +430,7 @@ class VideoExport:
     # This function will load a script (sequence of directions to tumble) and
     # step through it, it will save a temp image in ./Gifs/ and compile these
     # into a gif
-    def createGif(self):
+    def createVideo(self):
 
 
         if self.animatedTiltsFlag.get() == 1:
@@ -460,6 +460,10 @@ class VideoExport:
         if not os.path.exists("Videos"):
             os.makedirs("Videos")
 
+        # Make the temp directory to store temporary images
+        if not os.path.exists("Videos/temp"):
+            os.makedirs("Videos/temp")
+
         if self.exportFileNameText.get() == "": # If no file name was given create one
         
             x = 0
@@ -478,6 +482,8 @@ class VideoExport:
         else:
             exportFile = "Videos/" + self.exportFileNameText.get() + ".gif"
 
+        # Counts the current frame # that is being exported
+        frameCounter = 0
         for x in range(0, len(sequence)):   
 
 
@@ -489,21 +495,25 @@ class VideoExport:
 
                 newImages = self.tumbleGUI.animatedTumble(sequence[x] ,self.tileResInt, lineWidthInt)
                 images = images + newImages
+               
+
 
             else:
                 self.tumbleGUI.MoveDirection(sequence[x], redraw= False) # Move the board in the specified direction
 
                 # Call function to get and image in memory of the current state of the board, passing it the tile resolution and the line width to use
                 image = self.tumbleGUI.getImageOfBoard(self.tileResInt, lineWidthInt)
-
-                # Append the returned image to the image array
                 images.append(image)
+                
+                # fn = "Videos/temp/"+str(x).rjust(4,'0')+".png"
+                # print("Saving Image to " + fn)
+                # image.save(fn,format="PNG")
 
 
         
         # Save the image
-
         images[0].save(exportFile, save_all=True, append_images=images[1:], duration=framesPerSec, loop=1)
+        
 
         # Set the export Text
         self.exportText.set("Video saved at ./"+exportFile)
